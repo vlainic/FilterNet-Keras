@@ -1,9 +1,13 @@
 from tensorflow.keras.models import Sequential, Model
 from tensorflow.keras.layers import Dense, LeakyReLU, Input, Concatenate, AveragePooling1D, Conv1D, Flatten, BatchNormalization
 
-wave_input = Input(shape=(24, 1))
+time_series_len = 24
 
-def Conv1D_ks(kernelsize=1, in_shape=35):
+wave_input = Input(shape=(time_series_len, 1))
+
+### making convolutional layer
+### kernelsize and input shapes are changable
+def Conv1D_ks(kernelsize=1, in_shape=time_series_len):
     model = Sequential()
     model.add(Conv1D(filters=1, kernel_size=kernelsize, input_shape=(in_shape, 1), data_format='channels_last'))
     model.add(AveragePooling1D(pool_size=2, padding='same'))
@@ -29,16 +33,14 @@ l2_k4 = Conv1D_ks(kernelsize=4, in_shape=l1_k4.shape[1])(l1_k4)
 l2_k5 = Conv1D_ks(kernelsize=5, in_shape=l1_k5.shape[1])(l1_k5)
 l2_k6 = Conv1D_ks(kernelsize=6, in_shape=l1_k6.shape[1])(l1_k6)
 
-dense_input = Input(shape=(31, ))
+dense_input = Input(shape=(31, )) ### 31 is arbitrary here - it depends on your problem ;)
 
 ### Dense feature engineering:
 
 x = Dense(2**10, activation="relu")(dense_input)
-x = LeakyReLU(0.1)(x)
 x = BatchNormalization()(x)
 
 x = Dense(2**9, activation="relu")(x)
-x = LeakyReLU(0.1)(x)
 x = BatchNormalization()(x)
 
 combined = Concatenate()([Flatten()(l1_k1),
